@@ -1,4 +1,4 @@
-package resolver
+package resolvers
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -6,9 +6,19 @@ package resolver
 
 import (
 	graph "app/graph/generated"
+	"context"
+
+	"github.com/99designs/gqlgen/graphql"
+	"gorm.io/gorm"
 )
 
-type Resolver struct{}
+type Resolver struct {
+	Db *gorm.DB
+}
+
+type DirectiveRoot struct {
+	Authenticated func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+}
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }

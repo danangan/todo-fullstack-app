@@ -1,4 +1,4 @@
-package resolver
+package resolvers
 
 // This file will be automatically regenerated based on the schema, any resolver implementations
 // will be copied through when generating and any unknown code will be moved to the end.
@@ -6,41 +6,29 @@ package resolver
 
 import (
 	"app/graph/generated"
-	"app/pkg/db"
 	"app/pkg/db/models"
+	passwordPkg "app/pkg/password"
 	"context"
+	"errors"
 	"fmt"
 )
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) Register(ctx context.Context, firstName string, lastName string, email string, password string) (*generated.AuthPayload, error) {
-	user, err := models.NewUser(
-		firstName,
-		lastName,
-		email,
-		password,
-	)
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*generated.AuthPayload, error) {
 
-	if err != nil {
-		fmt.Println(err)
+	user := &models.User{}
 
-		return nil, err
-	}
-
-	db, err := db.CreateDBConnection()
-
-	if err != nil {
-		fmt.Println(err)
-
-		return nil, err
-	}
-
-	result := db.Create(&user)
+	result := r.Db.Where("email = ?", email).First(&user)
 
 	if result.Error != nil {
 		fmt.Println(result.Error)
-
 		return nil, result.Error
+	}
+
+	err := passwordPkg.ComparePassword(password, user.Password)
+
+	if err != nil {
+		return nil, errors.New("password does not match")
 	}
 
 	response := &generated.AuthPayload{
