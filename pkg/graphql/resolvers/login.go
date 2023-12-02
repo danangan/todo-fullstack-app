@@ -22,7 +22,6 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	result := r.Db.Where("email = ?", email).First(&user)
 
 	if result.Error != nil {
-		fmt.Println(result.Error)
 		return nil, result.Error
 	}
 
@@ -32,7 +31,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 		return nil, errors.New("password does not match")
 	}
 
-	token, err := jwt.GenerateToken(string(user.ID.String()))
+	token, err := jwt.GenerateToken(user.ID.String())
 
 	if err != nil {
 		fmt.Printf("failed to generate token, error: %v", err)

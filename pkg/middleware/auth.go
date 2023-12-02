@@ -22,14 +22,18 @@ func CreateAuthMiddleware(db *gorm.DB) Middleware {
 
 				if err != nil {
 					http.Error(w, "invalid auth token", http.StatusUnauthorized)
+
+					return
 				}
 
 				user := &models.User{}
 
-				result := db.Where("id = ?", claims.ID).First(user)
+				result := db.Where("id = ?", claims.UserId).First(user)
 
 				if result.Error != nil {
 					http.Error(w, "invalid auth token", http.StatusUnauthorized)
+
+					return
 				}
 
 				currentUser = user

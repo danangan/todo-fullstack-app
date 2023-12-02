@@ -5,7 +5,7 @@ import (
 	appContext "app/pkg/app-context"
 	"app/pkg/db/models"
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/99designs/gqlgen/graphql"
 )
@@ -19,7 +19,11 @@ func NewDirectiveRoot() *generated.DirectiveRoot {
 func authenticated(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
 	val := ctx.Value(appContext.CurrentUserKey)
 
-	currentUser := val.(*models.User)
-	fmt.Println(currentUser)
+	currentUser, ok := val.(*models.User)
+
+	if !ok || currentUser == nil {
+		return nil, errors.New("request is not authenticated")
+	}
+
 	return nil, nil
 }

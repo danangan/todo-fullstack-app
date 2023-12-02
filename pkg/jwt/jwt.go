@@ -15,26 +15,26 @@ var defaultSecretKey = "my-local-secret-key"
 
 // Custom Claims implementation
 type AppClaims struct {
-	Id string `json:"id"`
+	UserId string `json:"userId"`
 	jwt.RegisteredClaims
 }
 
 func (a AppClaims) Validate() error {
-	if a.Id == "" {
+	if a.UserId == "" {
 		return errors.New("id can't be empty")
 	}
 
 	return nil
 }
 
-func getSecretKey() string {
+func getSecretKey() []byte {
 	secretKeyFromEnv := os.Getenv("JWT_SECRET_KEY")
 
 	if secretKeyFromEnv == "" {
-		return defaultSecretKey
+		return []byte(defaultSecretKey)
 	}
 
-	return secretKeyFromEnv
+	return []byte(secretKeyFromEnv)
 }
 
 func GenerateToken(userId string) (string, error) {
@@ -46,15 +46,18 @@ func GenerateToken(userId string) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "MyApp",
 		},
 	}
+
+	fmt.Println(claims.UserId)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Sign the token with the secret key
 	tokenString, err := token.SignedString(getSecretKey())
 	if err != nil {
+		fmt.Println(err)
+
 		return "", err
 	}
 
@@ -76,11 +79,11 @@ func ParseToken(tokenString string) (*jwt.Token, *AppClaims, error) {
 		return nil, nil, err
 	}
 
-	appClaims, ok := token.Claims.(AppClaims)
+	appClaims, ok := token.Claims.(*AppClaims)
 
 	if !ok {
 		return nil, nil, fmt.Errorf("failed to cast claims type")
 	}
 
-	return token, &appClaims, nil
+	return token, appClaims, nil
 }
