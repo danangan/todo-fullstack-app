@@ -2,11 +2,11 @@ package resolvers
 
 import (
 	"app/graph/generated"
+	appContext "app/pkg/app-context"
 	"app/pkg/db/models"
 	"context"
 )
 
-// User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*generated.User, error) {
 	user := &models.User{}
 
@@ -17,4 +17,14 @@ func (r *queryResolver) User(ctx context.Context, id string) (*generated.User, e
 	}
 
 	return models.DBUserToGraphUser(user), nil
+}
+
+func (r *queryResolver) CurrentUser(ctx context.Context) (*generated.User, error) {
+	currentUser, err := appContext.GetCurrentUser(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return models.DBUserToGraphUser(currentUser), nil
 }

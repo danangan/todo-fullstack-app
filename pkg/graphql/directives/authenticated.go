@@ -3,7 +3,6 @@ package directives
 import (
 	"app/graph/generated"
 	appContext "app/pkg/app-context"
-	"app/pkg/db/models"
 	"context"
 	"errors"
 
@@ -17,13 +16,11 @@ func NewDirectiveRoot() *generated.DirectiveRoot {
 }
 
 func authenticated(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-	val := ctx.Value(appContext.CurrentUserKey)
+	currentUser, err := appContext.GetCurrentUser(ctx)
 
-	currentUser, ok := val.(*models.User)
-
-	if !ok || currentUser == nil {
+	if err != nil || currentUser == nil {
 		return nil, errors.New("request is not authenticated")
 	}
 
-	return nil, nil
+	return next(ctx)
 }

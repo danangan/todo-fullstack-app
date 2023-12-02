@@ -8,7 +8,8 @@ type User {
 }
 
 type Query {
-  user(id: ID!): User @authenticated
+  user(email: String!): User @authenticated
+  currentUser: User @authenticated
 }
 
 type AuthPayload {
@@ -19,5 +20,5 @@ type AuthPayload {
 type Mutation {
   register(firstName: String!, lastName: String!, email: String!, password: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
-  updateUser(id: ID!, firstName: String, lastName: String, email: String): User @authenticated
+  updateCurrentUser(firstName: String, lastName: String, email: String): User @authenticated
 }

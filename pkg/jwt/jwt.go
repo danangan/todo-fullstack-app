@@ -49,16 +49,15 @@ func GenerateToken(userId string) (string, error) {
 		},
 	}
 
-	fmt.Println(claims.UserId)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Sign the token with the secret key
 	tokenString, err := token.SignedString(getSecretKey())
+
 	if err != nil {
 		fmt.Println(err)
 
-		return "", err
+		return "", fmt.Errorf("failed to generate token")
 	}
 
 	return tokenString, nil
