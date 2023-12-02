@@ -7,6 +7,7 @@ package resolvers
 import (
 	"app/graph/generated"
 	"app/pkg/db/models"
+	"app/pkg/jwt"
 	passwordPkg "app/pkg/password"
 	"context"
 	"errors"
@@ -31,8 +32,16 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 		return nil, errors.New("password does not match")
 	}
 
+	token, err := jwt.GenerateToken(string(user.ID.String()))
+
+	if err != nil {
+		fmt.Printf("failed to generate token, error: %v", err)
+
+		return nil, errors.New("failed to generate token")
+	}
+
 	response := &generated.AuthPayload{
-		Token: "some-token",
+		Token: token,
 		User:  models.DBUserToGraphUser(user),
 	}
 

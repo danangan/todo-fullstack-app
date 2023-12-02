@@ -13,7 +13,7 @@ import (
 func CreateAuthMiddleware(db *gorm.DB) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			currentUser := &models.User{}
+			var currentUser *models.User
 
 			token := r.Header.Get(jwt.JwtHeaderToken)
 
@@ -24,11 +24,15 @@ func CreateAuthMiddleware(db *gorm.DB) Middleware {
 					http.Error(w, "invalid auth token", http.StatusUnauthorized)
 				}
 
-				result := db.Where("id = ?", claims.ID).First(currentUser)
+				user := &models.User{}
+
+				result := db.Where("id = ?", claims.ID).First(user)
 
 				if result.Error != nil {
 					http.Error(w, "invalid auth token", http.StatusUnauthorized)
 				}
+
+				currentUser = user
 			}
 
 			ctx := context.WithValue(r.Context(), appContext.CurrentUserKey, currentUser)
