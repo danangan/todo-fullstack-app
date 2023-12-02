@@ -1,9 +1,9 @@
 package appContext
 
 type AppContext struct {
-	Key string
+	key string
 }
 
 var (
-	CurrentUserKey = &AppContext{Key: "CurrentUser"}
+	CurrentUserKey = &AppContext{key: "CurrentUser"}
 )

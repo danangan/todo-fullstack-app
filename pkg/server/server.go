@@ -2,19 +2,17 @@ package server
 
 import (
 	"app/graph/generated"
-	appContext "app/pkg/app-context"
 	"app/pkg/db"
-	"app/pkg/db/models"
-	"app/pkg/resolvers"
-	"context"
-	"fmt"
+	"app/pkg/graphql/directives"
+	"app/pkg/graphql/resolvers"
+	"app/pkg/middleware"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"gorm.io/gorm"
 )
 
 var defaultPort string = "8080"
@@ -31,41 +29,30 @@ func CreateServer() {
 		log.Fatalf("Failed to create DB connection, error: %v", err)
 	}
 
-	d := generated.DirectiveRoot{
-		Authenticated: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
-			val := ctx.Value(appContext.CurrentUserKey)
+	gqlConfig := createGqlConfig(db)
 
-			currentUser := val.(*models.User)
-			fmt.Println(currentUser)
-			return nil, nil
-		},
-	}
+	authMiddleware := middleware.CreateAuthMiddleware(db)
 
-	c := generated.Config{Resolvers: &resolvers.Resolver{Db: db}, Directives: d}
+	mux := http.NewServeMux()
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-
-	contextProviderHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var currentUser *models.User
-		token := r.Header.Get("TOKEN")
-
-		if token != "" {
-			currentUser = &models.User{
-				FirstName: "Danang",
-				LastName:  "Nur",
-				Email:     "some-email",
-			}
-		}
-
-		ctx := context.WithValue(r.Context(), appContext.CurrentUserKey, currentUser)
-
-		test := handler.NewDefaultServer(generated.NewExecutableSchema(c))
-
-		test.ServeHTTP(w, r.WithContext(ctx))
-	})
-
-	http.Handle("/query", contextProviderHandler)
+	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	mux.Handle("/query", authMiddleware(createGqlHandler(gqlConfig)))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, mux))
+}
+
+func createGqlConfig(db *gorm.DB) generated.Config {
+	directives := directives.NewDirectiveRoot()
+	resolvers := resolvers.NewResolver(db)
+
+	return generated.Config{Resolvers: resolvers, Directives: *directives}
+}
+
+func createGqlHandler(config generated.Config) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gqlServer := handler.NewDefaultServer(generated.NewExecutableSchema(config))
+
+		gqlServer.ServeHTTP(w, r)
+	})
 }

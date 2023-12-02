@@ -6,18 +6,18 @@ package resolvers
 
 import (
 	graph "app/graph/generated"
-	"context"
 
-	"github.com/99designs/gqlgen/graphql"
 	"gorm.io/gorm"
 )
 
-type Resolver struct {
-	Db *gorm.DB
+func NewResolver(db *gorm.DB) graph.ResolverRoot {
+	return &Resolver{
+		Db: db,
+	}
 }
 
-type DirectiveRoot struct {
-	Authenticated func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+type Resolver struct {
+	Db *gorm.DB
 }
 
 // Mutation returns MutationResolver implementation.
