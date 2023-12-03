@@ -4,23 +4,32 @@ import (
 	"app/graphql/generated"
 	"app/pkg/db/models"
 	"app/pkg/jwt"
+	passwordPkg "app/pkg/password"
 	"context"
 	"fmt"
 )
 
 func (r *mutationResolver) Register(ctx context.Context, firstName string, lastName string, email string, password string) (*generated.AuthPayload, error) {
-	user, err := models.NewUser(
+	user := models.NewUser(
 		firstName,
 		lastName,
 		email,
 		password,
 	)
 
-	if err != nil {
-		fmt.Println(err)
+	validationErrors := user.Validate()
 
+	if validationErrors != nil {
+		return nil, validationErrors
+	}
+
+	hashedPassword, err := passwordPkg.HashPassword(user.Password)
+
+	if err != nil {
 		return nil, err
 	}
+
+	user.Password = hashedPassword
 
 	result := r.Db.Create(&user)
 

@@ -27,6 +27,12 @@ func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, firstName *str
 		currentUser.Email = *email
 	}
 
+	validationErrors := currentUser.Validate()
+
+	if validationErrors != nil {
+		return nil, validationErrors
+	}
+
 	result := r.Db.Save(currentUser)
 
 	if result.Error != nil {

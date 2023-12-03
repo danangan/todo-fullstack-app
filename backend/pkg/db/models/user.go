@@ -2,38 +2,39 @@ package models
 
 import (
 	graphModel "app/graphql/generated"
-	passwordPkg "app/pkg/password"
 
 	"github.com/go-playground/validator/v10"
 )
 
 type User struct {
 	BaseModel
-	FirstName string `gorm:"notNull" validate:"required,alpha,min:3"`
-	LastName  string `gorm:"notNull" validate:"required,alpha,min:3"`
+	FirstName string `gorm:"notNull" validate:"required,alpha,min=3"`
+	LastName  string `gorm:"notNull" validate:"required,alpha,min=3"`
 	Email     string `gorm:"notNull;unique" validate:"required,email"`
-	Password  string `gorm:"notNull" validate:"required,min:6"`
+	Password  string `gorm:"notNull" validate:"required,min=6"`
 }
 
-func (u *User) Validate() error {
+func (u *User) Validate() *validator.ValidationErrors {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	return validate.Struct(u)
-}
-
-func NewUser(firstName string, lastName string, email string, password string) (*User, error) {
-	hashedPassword, err := passwordPkg.HashPassword(password)
+	err := validate.Struct(u)
 
 	if err != nil {
-		return nil, err
+		validationErrors := err.(validator.ValidationErrors)
+
+		return &validationErrors
 	}
 
+	return nil
+}
+
+func NewUser(firstName string, lastName string, email string, password string) *User {
 	return &User{
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
-		Password:  hashedPassword,
-	}, nil
+		Password:  password,
+	}
 }
 
 func DBUserToGraphUser(user *User) *graphModel.User {
