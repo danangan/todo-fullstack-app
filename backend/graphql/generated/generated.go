@@ -300,16 +300,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../../graphql/schema.graphql", Input: `directive @authenticated on FIELD_DEFINITION
-
-type User {
-  id: ID!
-  firstName: String!
-  lastName: String!
-  email: String!
-}
-
-type Query {
+	{Name: "../../../graphql/directives.graphql", Input: `directive @authenticated on FIELD_DEFINITION`, BuiltIn: false},
+	{Name: "../../../graphql/operations.graphql", Input: `type Query {
   user(email: String!): User @authenticated
   currentUser: User @authenticated
 }
@@ -324,6 +316,13 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload
   updateCurrentUser(firstName: String, lastName: String, email: String): User @authenticated
 }`, BuiltIn: false},
+	{Name: "../../../graphql/schema.graphql", Input: `type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

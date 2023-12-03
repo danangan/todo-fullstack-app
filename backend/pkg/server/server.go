@@ -35,8 +35,8 @@ func CreateServer() {
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	mux.Handle("/query", authMiddleware(createGqlHandler(gqlConfig)))
+	mux.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	mux.Handle("/graphql", authMiddleware(createGqlHandler(gqlConfig)))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
