@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"app/graph/generated"
+	"app/graphql/generated"
 	"context"
 	"fmt"
 )

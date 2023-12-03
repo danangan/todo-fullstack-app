@@ -300,7 +300,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `directive @authenticated on FIELD_DEFINITION
+	{Name: "../../../graphql/schema.graphql", Input: `directive @authenticated on FIELD_DEFINITION
 
 type User {
   id: ID!
@@ -526,7 +526,7 @@ func (ec *executionContext) _AuthPayload_user(ctx context.Context, field graphql
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖappᚋgraphᚋgeneratedᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AuthPayload_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -621,7 +621,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 	}
 	res := resTmp.(*AuthPayload)
 	fc.Result = res
-	return ec.marshalOAuthPayload2ᚖappᚋgraphᚋgeneratedᚐAuthPayload(ctx, field.Selections, res)
+	return ec.marshalOAuthPayload2ᚖappᚋgraphqlᚋgeneratedᚐAuthPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -679,7 +679,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*AuthPayload)
 	fc.Result = res
-	return ec.marshalOAuthPayload2ᚖappᚋgraphᚋgeneratedᚐAuthPayload(ctx, field.Selections, res)
+	return ec.marshalOAuthPayload2ᚖappᚋgraphqlᚋgeneratedᚐAuthPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -746,7 +746,7 @@ func (ec *executionContext) _Mutation_updateCurrentUser(ctx context.Context, fie
 		if data, ok := tmp.(*User); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graph/generated.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graphql/generated.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -757,7 +757,7 @@ func (ec *executionContext) _Mutation_updateCurrentUser(ctx context.Context, fie
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖappᚋgraphᚋgeneratedᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateCurrentUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -828,7 +828,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		if data, ok := tmp.(*User); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graph/generated.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graphql/generated.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -839,7 +839,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖappᚋgraphᚋgeneratedᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -910,7 +910,7 @@ func (ec *executionContext) _Query_currentUser(ctx context.Context, field graphq
 		if data, ok := tmp.(*User); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graph/generated.User`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graphql/generated.User`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -921,7 +921,7 @@ func (ec *executionContext) _Query_currentUser(ctx context.Context, field graphq
 	}
 	res := resTmp.(*User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖappᚋgraphᚋgeneratedᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_currentUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3644,7 +3644,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2ᚖappᚋgraphᚋgeneratedᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3907,7 +3907,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAuthPayload2ᚖappᚋgraphᚋgeneratedᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v *AuthPayload) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthPayload2ᚖappᚋgraphqlᚋgeneratedᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v *AuthPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3956,7 +3956,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖappᚋgraphᚋgeneratedᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

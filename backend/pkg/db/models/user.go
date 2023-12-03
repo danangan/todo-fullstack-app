@@ -1,16 +1,24 @@
 package models
 
 import (
-	graphModel "app/graph/generated"
+	graphModel "app/graphql/generated"
 	passwordPkg "app/pkg/password"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type User struct {
 	BaseModel
-	FirstName string `gorm:"notNull"`
-	LastName  string `gorm:"notNull"`
-	Email     string `gorm:"notNull;unique"`
-	Password  string `gorm:"notNull"`
+	FirstName string `gorm:"notNull" validate:"required,alpha,min:3"`
+	LastName  string `gorm:"notNull" validate:"required,alpha,min:3"`
+	Email     string `gorm:"notNull;unique" validate:"required,email"`
+	Password  string `gorm:"notNull" validate:"required,min:6"`
+}
+
+func (u *User) Validate() error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	return validate.Struct(u)
 }
 
 func NewUser(firstName string, lastName string, email string, password string) (*User, error) {

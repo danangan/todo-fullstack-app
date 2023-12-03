@@ -1,7 +1,7 @@
 package server
 
 import (
-	"app/graph/generated"
+	"app/graphql/generated"
 	"app/pkg/db"
 	"app/pkg/graphql/directives"
 	"app/pkg/graphql/resolvers"

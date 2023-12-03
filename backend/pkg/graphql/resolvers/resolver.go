@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	graph "app/graph/generated"
+	graph "app/graphql/generated"
 
 	"gorm.io/gorm"
 )

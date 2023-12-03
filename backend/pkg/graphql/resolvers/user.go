@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"app/graph/generated"
+	"app/graphql/generated"
 	appContext "app/pkg/app-context"
 	"app/pkg/db/models"
 	"context"
