@@ -1,0 +1,6 @@
+schema: http://localhost:8080/graphql
+generates:
+  './src/__generated__/':
+    preset: client
+    presetConfig: 
+      gqlTagName: gql

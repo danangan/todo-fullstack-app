@@ -1,28 +1,39 @@
 {
   "name": "frontend",
-  "version": "0.1.0",
   "private": true,
+  "sideEffects": false,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "codegen": "graphql-codegen --config graphql-config.ts"
+    "build": "remix build",
+    "dev": "remix dev --manual",
+    "start": "remix-serve ./build/index.js",
+    "typecheck": "tsc",
+    "codegen": "graphql-codegen --config codegen.yaml"
   },
   "dependencies": {
-    "next": "14.0.3",
-    "react": "^18",
-    "react-dom": "^18"
+    "@remix-run/css-bundle": "^2.3.1",
+    "@remix-run/node": "^2.3.1",
+    "@remix-run/react": "^2.3.1",
+    "@remix-run/serve": "^2.3.1",
+    "isbot": "^3.6.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.0",
-    "@graphql-codegen/client-preset": "4.1.0",
-    "@types/graphql": "^14.5.0",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.0.3",
-    "typescript": "^5"
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/client-preset": "^4.1.0",
+    "@remix-run/dev": "^2.3.1",
+    "@remix-run/eslint-config": "^2.3.1",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "eslint": "^8.38.0",
+    "graphql": "^16.8.1",
+    "typescript": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "resolutions": {
+    "string-width": "4.2.2"
   }
 }
