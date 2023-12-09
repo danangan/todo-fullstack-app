@@ -6520,6 +6520,11 @@ remedial@^1.0.7:
   resolved "https://registry.yarnpkg.com/remedial/-/remedial-1.0.8.tgz#a5e4fd52a0e4956adbaf62da63a5a46a78c578a0"
   integrity sha512-/62tYiOe6DzS5BqVsNpH/nkGlX45C/Sp6V+NtiN6JQNS1Viay7cWkazmRkrQrdFj2eshDe96SIQNIoMxqhzBOg==
 
+remix@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/remix/-/remix-2.3.1.tgz#0714009e861af2bcc816f04696bb708e73d08e29"
+  integrity sha512-fw4Oar/D/l+IAv8s3wscE6vLo89CSmpeqGlnKUVKQSLIq0iHUD8P+T6w44JFri74gVjVa/YXWFPOT5EJd/MIeQ==
+
 remove-trailing-separator@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
