@@ -16,6 +16,7 @@ type Todo struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	DueDate     time.Time `json:"dueDate"`
+	UserID      string    `json:"userId"`
 }
 
 type User struct {

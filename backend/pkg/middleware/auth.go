@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	appContext "app/pkg/app-context"
+	"app/pkg/appContext"
 	"app/pkg/db/models"
 	"app/pkg/jwt"
 	"context"

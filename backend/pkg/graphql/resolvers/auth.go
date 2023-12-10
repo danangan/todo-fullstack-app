@@ -36,7 +36,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 	response := &generated.AuthPayload{
 		Token: token,
-		User:  models.DBUserToGraphUser(user),
+		User:  user.ToGraphUser(),
 	}
 
 	return response, nil
@@ -80,7 +80,7 @@ func (r *mutationResolver) Register(ctx context.Context, firstName string, lastN
 
 	response := &generated.AuthPayload{
 		Token: token,
-		User:  models.DBUserToGraphUser(user),
+		User:  user.ToGraphUser(),
 	}
 
 	return response, nil

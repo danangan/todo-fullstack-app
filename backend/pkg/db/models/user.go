@@ -28,20 +28,20 @@ func (u *User) Validate() *validator.ValidationErrors {
 	return nil
 }
 
+func (u *User) ToGraphUser() *graphModel.User {
+	return &graphModel.User{
+		ID:        u.ID.String(),
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Email:     u.Email,
+	}
+}
+
 func NewUser(firstName string, lastName string, email string, password string) *User {
 	return &User{
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
 		Password:  password,
-	}
-}
-
-func DBUserToGraphUser(user *User) *graphModel.User {
-	return &graphModel.User{
-		ID:        user.ID.String(),
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
 	}
 }

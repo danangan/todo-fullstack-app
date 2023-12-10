@@ -2,7 +2,7 @@ package directives
 
 import (
 	"app/graphql/generated"
-	appContext "app/pkg/app-context"
+	"app/pkg/appContext"
 	"context"
 	"errors"
 

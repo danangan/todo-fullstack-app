@@ -2,12 +2,40 @@ package resolvers
 
 import (
 	graph "app/graphql/generated"
+	"app/pkg/appContext"
+	"app/pkg/appError"
+	"app/pkg/db/models"
 	"context"
 	"time"
 )
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, title string, description string, dueDate time.Time) (*graph.Todo, error) {
-	panic("not implemented")
+	user, err := appContext.GetCurrentUser(ctx)
+
+	if err != nil {
+		return nil, appError.ErrServer
+	}
+
+	todo := &models.Todo{
+		Title:       title,
+		Description: description,
+		DueDate:     dueDate,
+		User:        *user,
+	}
+
+	validationError := todo.Validate()
+
+	if validationError != nil {
+		return nil, validationError
+	}
+
+	result := r.Db.Create(todo)
+
+	if result.Error != nil {
+		return nil, appError.ErrServer
+	}
+
+	return todo.ToGraphTodo(), nil
 }
 
 func (r *mutationResolver) UpdateTodo(ctx context.Context, title *string, description *string, dueDate *time.Time) (*graph.Todo, error) {

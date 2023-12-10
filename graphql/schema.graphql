@@ -12,4 +12,5 @@ type Todo {
   title: String!
   description: String!
   dueDate: Date!
+  userId: ID!
 }
