@@ -30,6 +30,7 @@ func Migrate() {
 
 	// Migrate the schema
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Todo{})
 }
 
 func createDsn(dbConfig *DBConfig) string {
