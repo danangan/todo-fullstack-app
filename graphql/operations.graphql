@@ -12,4 +12,7 @@ type Mutation {
   register(firstName: String!, lastName: String!, email: String!, password: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
   updateCurrentUser(firstName: String, lastName: String, email: String): User @authenticated
+  createTodo(title: String!, description: String!, dueDate: Date!): Todo @authenticated
+  updateTodo(title: String, description: String, dueDate: Date): Todo @authenticated
+  deleteTodo(id: ID!): Boolean @authenticated
 }
