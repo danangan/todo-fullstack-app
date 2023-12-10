@@ -12,10 +12,9 @@ type Todo struct {
 	BaseModel
 	UserID      uuid.UUID `gorm:"not null"`
 	User        User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Title       string    `gorm:"notNull" validate:"required,alpha,min=3"`
-	Description string    `gorm:"notNull" validate:"required,alpha,min=3"`
-	DueDate     time.Time `gorm:"notNull;unique" validate:"required,email"`
-	Password    string    `gorm:"notNull" validate:"required,min=6"`
+	Title       string    `gorm:"notNull" validate:"required,min=3"`
+	Description string    `gorm:"notNull" validate:"required,min=3"`
+	DueDate     time.Time `gorm:"notNull" validate:"required"`
 }
 
 func (t *Todo) Validate() *validator.ValidationErrors {
@@ -34,6 +33,7 @@ func (t *Todo) Validate() *validator.ValidationErrors {
 
 func (t *Todo) ToGraphTodo() *generated.Todo {
 	return &generated.Todo{
+		ID:          t.ID.String(),
 		Title:       t.Title,
 		Description: t.Description,
 		DueDate:     t.DueDate,
