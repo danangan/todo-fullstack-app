@@ -3,9 +3,9 @@ package resolvers
 import (
 	"app/graphql/generated"
 	"app/pkg/appContext"
+	"app/pkg/appError"
 	"app/pkg/db/models"
 	"context"
-	"fmt"
 )
 
 func (r *queryResolver) User(ctx context.Context, id string) (*generated.User, error) {
@@ -30,16 +30,11 @@ func (r *queryResolver) CurrentUser(ctx context.Context) (*generated.User, error
 	return currentUser.ToGraphUser(), nil
 }
 
-// DeleteUser is the resolver for the deleteUser field.
-func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (*generated.User, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
-}
-
 func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, firstName *string, lastName *string, email *string) (*generated.User, error) {
 	currentUser, err := appContext.GetCurrentUser(ctx)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve current user")
+		return nil, appError.ErrServer
 	}
 
 	if firstName != nil {
@@ -63,7 +58,7 @@ func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, firstName *str
 	result := r.Db.Save(currentUser)
 
 	if result.Error != nil {
-		return nil, fmt.Errorf("failed to update user")
+		return nil, appError.ErrServer
 	}
 
 	return currentUser.ToGraphUser(), nil
