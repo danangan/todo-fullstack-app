@@ -11,7 +11,7 @@ import (
 type Todo struct {
 	BaseModel
 	UserID      uuid.UUID `gorm:"not null"`
-	User        User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	User        User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" validate:"-"`
 	Title       string    `gorm:"notNull" validate:"required,min=3"`
 	Description string    `gorm:"notNull" validate:"required,min=3"`
 	DueDate     time.Time `gorm:"notNull" validate:"required"`

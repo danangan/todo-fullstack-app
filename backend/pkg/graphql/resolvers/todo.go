@@ -9,6 +9,30 @@ import (
 	"time"
 )
 
+func (r *queryResolver) Todos(ctx context.Context) ([]*graph.Todo, error) {
+	user, err := appContext.GetCurrentUser(ctx)
+
+	if err != nil {
+		return nil, appError.ErrServer
+	}
+
+	todos := make([]*models.Todo, 0)
+
+	result := r.Db.Find(&todos, "user_id = ?", user.ID.String())
+
+	if result.Error != nil {
+		return nil, appError.ErrServer
+	}
+
+	graphTodos := make([]*graph.Todo, len(todos))
+
+	for i, v := range todos {
+		graphTodos[i] = v.ToGraphTodo()
+	}
+
+	return graphTodos, nil
+}
+
 func (r *mutationResolver) CreateTodo(ctx context.Context, title string, description string, dueDate time.Time) (*graph.Todo, error) {
 	user, err := appContext.GetCurrentUser(ctx)
 
@@ -46,7 +70,8 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, title *str
 	}
 
 	todo := &models.Todo{}
-	result := r.Db.First(todo, "ID = ? AND UserID = ", id, user.ID.String())
+
+	result := r.Db.Where("id = ? AND user_id = ?", id, user.ID.String()).First(todo)
 
 	if result.Error != nil {
 		return nil, appError.ErrServer
@@ -87,7 +112,7 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (bool, err
 	}
 
 	todo := &models.Todo{}
-	result := r.Db.First(todo, "ID = ? AND UserID = ", id, user.ID.String())
+	result := r.Db.First(todo, "id = ? AND user_id = ?", id, user.ID.String())
 
 	if result.Error != nil {
 		return false, appError.ErrServer

@@ -1,6 +1,7 @@
 type Query {
   user(email: String!): User @authenticated
   currentUser: User @authenticated
+  todos: [Todo!]! @authenticated
 }
 
 type AuthPayload {
