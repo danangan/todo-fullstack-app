@@ -1,8 +1,8 @@
-package redis
+package jwt
 
 import (
-	"app/pkg/jwt"
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -11,7 +11,7 @@ import (
 var blackListNamespace = "jwt_blacklist"
 
 func BlackListToken(ctx context.Context, client *redis.Client, tokenString string) (bool, error) {
-	token, claims, err := jwt.ParseToken(tokenString)
+	token, claims, err := ParseToken(tokenString)
 
 	if err != nil {
 		return false, err
@@ -50,7 +50,7 @@ func IsTokenBlackListed(ctx context.Context, client *redis.Client, tokenString s
 }
 
 func CleanupBlackListedToken(ctx context.Context, client *redis.Client, time time.Time) error {
-	_, err := client.ZRemRangeByScore(ctx, blackListNamespace, 0, time.Unix()).Result()
+	_, err := client.ZRemRangeByScore(ctx, blackListNamespace, "-inf", strconv.FormatInt(time.Unix(), 10)).Result()
 
 	return err
 }
