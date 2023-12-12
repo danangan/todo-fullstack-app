@@ -49,6 +49,7 @@ func IsTokenBlackListed(ctx context.Context, client *redis.Client, tokenString s
 	return false, err
 }
 
+// Todo: To create a background job that clean up the expired token in the black list
 func CleanupBlackListedToken(ctx context.Context, client *redis.Client, time time.Time) error {
 	_, err := client.ZRemRangeByScore(ctx, blackListNamespace, "-inf", strconv.FormatInt(time.Unix(), 10)).Result()
 

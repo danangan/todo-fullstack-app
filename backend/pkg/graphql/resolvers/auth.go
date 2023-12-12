@@ -10,6 +10,10 @@ import (
 	"fmt"
 )
 
+// Todos
+// * Track the user and the current active token
+// * To revoke the previously granted token by adding it to the blacklist if the user still have an active token
+// * Maybe we don't need to revoke it at all? Maybe we can just return the existing one?
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*generated.AuthPayload, error) {
 
 	user := &models.User{}
