@@ -12,6 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -29,9 +30,15 @@ func CreateServer() {
 		log.Fatalf("Failed to create DB connection, error: %v", err)
 	}
 
-	gqlConfig := createGqlConfig(db)
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
-	authMiddleware := middleware.CreateAuthMiddleware(db)
+	gqlConfig := createGqlConfig(db, redisClient)
+
+	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient)
 
 	mux := http.NewServeMux()
 
@@ -42,9 +49,9 @@ func CreateServer() {
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
-func createGqlConfig(db *gorm.DB) generated.Config {
+func createGqlConfig(db *gorm.DB, redisClient *redis.Client) generated.Config {
 	directives := directives.NewDirectiveRoot()
-	resolvers := resolvers.NewResolver(db)
+	resolvers := resolvers.NewResolver(db, redisClient)
 
 	return generated.Config{Resolvers: resolvers, Directives: *directives}
 }

@@ -3,17 +3,20 @@ package resolvers
 import (
 	graph "app/graphql/generated"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func NewResolver(db *gorm.DB) graph.ResolverRoot {
+func NewResolver(db *gorm.DB, redisClient *redis.Client) graph.ResolverRoot {
 	return &Resolver{
-		Db: db,
+		Db:          db,
+		RedisClient: redisClient,
 	}
 }
 
 type Resolver struct {
-	Db *gorm.DB
+	Db          *gorm.DB
+	RedisClient *redis.Client
 }
 
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }

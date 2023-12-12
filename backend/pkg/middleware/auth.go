@@ -7,10 +7,11 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func CreateAuthMiddleware(db *gorm.DB) Middleware {
+func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var currentUser *models.User
