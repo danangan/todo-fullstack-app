@@ -9,11 +9,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var tokenBlackListNamespace = "token_blacklist"
+var tokenBlackListCacheNamespace = "token_blacklist"
 var tokenBlackListCacheValue = "true"
 
 func buildBlackListCacheKey(token string) string {
-	return fmt.Sprintf("%s_%s", tokenBlackListNamespace, token)
+	return fmt.Sprintf("%s_%s", tokenBlackListCacheNamespace, token)
 }
 
 func RevokeToken(ctx context.Context, client *redis.Client, tokenString string, expiry time.Time) (bool, error) {

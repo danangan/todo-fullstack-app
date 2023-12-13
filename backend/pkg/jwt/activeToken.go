@@ -9,10 +9,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var tokenCacheNameSpace = "user_active_token"
+var activeTokenCacheNamespace = "user_active_token"
 
 func buildCacheKey(userId string) string {
-	return fmt.Sprintf("%s_%s", tokenCacheNameSpace, userId)
+	return fmt.Sprintf("%s_%s", activeTokenCacheNamespace, userId)
 }
 
 func UpdateActiveToken(ctx context.Context, redisClient *redis.Client, token string, userId string, expiry time.Time) error {
