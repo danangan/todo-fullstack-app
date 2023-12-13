@@ -6,6 +6,7 @@ import (
 	"app/pkg/graphql/directives"
 	"app/pkg/graphql/resolvers"
 	"app/pkg/middleware"
+	_tokenManager "app/pkg/tokenManager"
 	"log"
 	"net/http"
 	"os"
@@ -36,9 +37,11 @@ func CreateServer() {
 		DB:       0,  // use default DB
 	})
 
+	tokenManager := _tokenManager.NewTokenManager(redisClient)
+
 	gqlConfig := createGqlConfig(db, redisClient)
 
-	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient)
+	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient, tokenManager)
 
 	mux := http.NewServeMux()
 

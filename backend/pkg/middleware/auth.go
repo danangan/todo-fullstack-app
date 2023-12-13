@@ -3,7 +3,7 @@ package middleware
 import (
 	"app/pkg/appContext"
 	"app/pkg/db/models"
-	"app/pkg/jwt"
+	_tokenManager "app/pkg/tokenManager"
 	"context"
 	"net/http"
 
@@ -11,23 +11,23 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client) Middleware {
+func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenManager.TokenManager) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var currentUser *models.User
 
-			token := r.Header.Get(jwt.JwtHeaderToken)
+			stringToken := r.Header.Get("X-AUTH-TOKEN")
 
-			if token != "" {
-				_, claims, err := jwt.ParseToken(token)
+			if stringToken != "" {
+				token, claims, err := tokenManager.ParseToken(stringToken)
 
-				if err != nil {
+				if err != nil || !token.Valid {
 					http.Error(w, "invalid auth token", http.StatusUnauthorized)
 
 					return
 				}
 
-				isTokenRevoked, err := jwt.IsTokenRevoked(r.Context(), redisClient, token)
+				isTokenRevoked, err := tokenManager.IsTokenRevoked(r.Context(), stringToken)
 
 				if err != nil {
 					http.Error(w, "can't verify token", http.StatusInternalServerError)
