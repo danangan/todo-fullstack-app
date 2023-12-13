@@ -39,7 +39,7 @@ func CreateServer() {
 
 	tokenManager := _tokenManager.NewTokenManager(redisClient)
 
-	gqlConfig := createGqlConfig(db, redisClient)
+	gqlConfig := createGqlConfig(db, redisClient, tokenManager)
 
 	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient, tokenManager)
 
@@ -52,9 +52,9 @@ func CreateServer() {
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
-func createGqlConfig(db *gorm.DB, redisClient *redis.Client) generated.Config {
+func createGqlConfig(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenManager.TokenManager) generated.Config {
 	directives := directives.NewDirectiveRoot()
-	resolvers := resolvers.NewResolver(db, redisClient)
+	resolvers := resolvers.NewResolver(db, redisClient, tokenManager)
 
 	return generated.Config{Resolvers: resolvers, Directives: *directives}
 }

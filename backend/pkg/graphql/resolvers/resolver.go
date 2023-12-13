@@ -2,21 +2,24 @@ package resolvers
 
 import (
 	graph "app/graphql/generated"
+	_tokenManager "app/pkg/tokenManager"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func NewResolver(db *gorm.DB, redisClient *redis.Client) graph.ResolverRoot {
+func NewResolver(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenManager.TokenManager) graph.ResolverRoot {
 	return &Resolver{
-		Db:          db,
-		RedisClient: redisClient,
+		Db:           db,
+		RedisClient:  redisClient,
+		TokenManager: tokenManager,
 	}
 }
 
 type Resolver struct {
-	Db          *gorm.DB
-	RedisClient *redis.Client
+	Db           *gorm.DB
+	RedisClient  *redis.Client
+	TokenManager *_tokenManager.TokenManager
 }
 
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
