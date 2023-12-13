@@ -1,12 +1,14 @@
 package jwt
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 var JwtHeaderToken = "X-AUTH-TOKEN"
@@ -37,7 +39,44 @@ func getSecretKey() []byte {
 	return []byte(secretKeyFromEnv)
 }
 
-func GenerateToken(userId string) (string, error) {
+func GenerateToken(ctx context.Context, redisClient *redis.Client, userId string) (string, error) {
+	token, err := GetActiveToken(ctx, redisClient, userId)
+
+	if err != nil {
+		return "", nil
+	}
+
+	// If currently there is an active token, revoke it before regenerating a new one
+	if token != "" {
+		_, claims, err := ParseToken(token)
+
+		if err != nil {
+			return "", nil
+		}
+
+		expiryTime := claims.ExpiresAt.Time
+
+		RevokeToken(ctx, redisClient, token, expiryTime)
+	}
+
+	newTokenExpiry := time.Now().Add(24 * time.Hour)
+
+	newToken, err := CreateToken(userId, newTokenExpiry)
+
+	if err != nil {
+		return "", nil
+	}
+
+	err = UpdateActiveToken(ctx, redisClient, newToken, userId, newTokenExpiry)
+
+	if err != nil {
+		return "", nil
+	}
+
+	return newToken, nil
+}
+
+func CreateToken(userId string, expiry time.Time) (string, error) {
 	// Create a new token with a signing method and claims
 	claims := &AppClaims{
 		userId,

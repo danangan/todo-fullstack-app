@@ -27,7 +27,7 @@ func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client) Middleware {
 					return
 				}
 
-				isBlackListed, err := jwt.IsTokenBlackListed(r.Context(), redisClient, token)
+				isTokenRevoked, err := jwt.IsTokenRevoked(r.Context(), redisClient, token)
 
 				if err != nil {
 					http.Error(w, "can't verify token", http.StatusInternalServerError)
@@ -35,7 +35,7 @@ func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client) Middleware {
 					return
 				}
 
-				if isBlackListed {
+				if isTokenRevoked {
 					http.Error(w, "token is invalid", http.StatusUnauthorized)
 
 					return
