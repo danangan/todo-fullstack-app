@@ -1,4 +1,4 @@
-package tokenManager
+package tokenService
 
 import (
 	"context"
@@ -48,7 +48,7 @@ type TokenManager struct {
 	redisClient *redis.Client
 }
 
-func NewTokenManager(redisClient *redis.Client) *TokenManager {
+func New(redisClient *redis.Client) *TokenManager {
 	return &TokenManager{
 		secretKey: getSecretKey(),
 	}

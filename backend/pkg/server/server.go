@@ -6,7 +6,9 @@ import (
 	"app/pkg/graphql/directives"
 	"app/pkg/graphql/resolvers"
 	"app/pkg/middleware"
-	_tokenManager "app/pkg/tokenManager"
+	_todoService "app/pkg/todoService"
+	_tokenService "app/pkg/tokenService"
+	_userService "app/pkg/userService"
 	"log"
 	"net/http"
 	"os"
@@ -37,11 +39,14 @@ func CreateServer() {
 		DB:       0,  // use default DB
 	})
 
-	tokenManager := _tokenManager.NewTokenManager(redisClient)
+	// Service initialization
+	tokenService := _tokenService.New(redisClient)
+	userService := _userService.New(db)
+	todoService := _todoService.New(db)
 
-	gqlConfig := createGqlConfig(db, redisClient, tokenManager)
+	gqlConfig := createGqlConfig(db, redisClient, tokenService, userService, todoService)
 
-	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient, tokenManager)
+	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient, tokenService)
 
 	mux := http.NewServeMux()
 
@@ -52,9 +57,9 @@ func CreateServer() {
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
-func createGqlConfig(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenManager.TokenManager) generated.Config {
+func createGqlConfig(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenService.TokenManager, userService *_userService.UserService, todoService *_todoService.TodoService) generated.Config {
 	directives := directives.NewDirectiveRoot()
-	resolvers := resolvers.NewResolver(db, redisClient, tokenManager)
+	resolvers := resolvers.NewResolver(db, redisClient, tokenManager, userService, todoService)
 
 	return generated.Config{Resolvers: resolvers, Directives: *directives}
 }

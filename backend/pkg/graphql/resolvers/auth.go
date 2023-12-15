@@ -29,7 +29,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 		return nil, errors.New("password does not match")
 	}
 
-	token, err := r.TokenManager.GenerateToken(ctx, user.ID.String())
+	token, err := r.TokenService.GenerateToken(ctx, user.ID.String())
 
 	if err != nil {
 		fmt.Printf("failed to generate token, error: %v", err)
@@ -75,7 +75,7 @@ func (r *mutationResolver) Register(ctx context.Context, firstName string, lastN
 		return nil, result.Error
 	}
 
-	token, err := r.TokenManager.GenerateToken(ctx, user.ID.String())
+	token, err := r.TokenService.GenerateToken(ctx, user.ID.String())
 
 	if err != nil {
 		return nil, err

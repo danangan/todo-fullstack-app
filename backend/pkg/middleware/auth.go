@@ -3,7 +3,7 @@ package middleware
 import (
 	"app/pkg/appContext"
 	"app/pkg/db/models"
-	_tokenManager "app/pkg/tokenManager"
+	"app/pkg/tokenService"
 	"context"
 	"net/http"
 
@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenManager.TokenManager) Middleware {
+func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client, tokenManager *tokenService.TokenManager) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var currentUser *models.User

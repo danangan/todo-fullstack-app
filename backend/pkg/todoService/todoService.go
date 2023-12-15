@@ -11,6 +11,12 @@ type TodoService struct {
 	Db *gorm.DB
 }
 
+func New(db *gorm.DB) *TodoService {
+	return &TodoService{
+		Db: db,
+	}
+}
+
 func (t *TodoService) GetTodo(id string) (*models.Todo, error) {
 	return nil, nil
 }

@@ -4,17 +4,14 @@ import (
 	"app/graphql/generated"
 	"app/pkg/appContext"
 	"app/pkg/appError"
-	"app/pkg/db/models"
 	"context"
 )
 
 func (r *queryResolver) User(ctx context.Context, id string) (*generated.User, error) {
-	user := &models.User{}
+	user, err := r.UserService.GetUser(id)
 
-	result := r.Db.Where("id = ?", id).First(user)
-
-	if result.Error != nil {
-		return nil, result.Error
+	if err != nil {
+		return nil, appError.ErrServer
 	}
 
 	return user.ToGraphUser(), nil
