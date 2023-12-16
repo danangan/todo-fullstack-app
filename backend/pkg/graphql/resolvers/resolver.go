@@ -5,15 +5,10 @@ import (
 	todoservice "app/pkg/todoService"
 	"app/pkg/tokenService"
 	"app/pkg/userService"
-
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
-func NewResolver(db *gorm.DB, redisClient *redis.Client, tokenService *tokenService.TokenManager, userService *userService.UserService, todoService *todoservice.TodoService) graph.ResolverRoot {
+func NewResolver(tokenService *tokenService.TokenManager, userService *userService.UserService, todoService *todoservice.TodoService) graph.ResolverRoot {
 	return &Resolver{
-		Db:           db,
-		RedisClient:  redisClient,
 		TokenService: tokenService,
 		UserService:  userService,
 		TodoService:  todoService,
@@ -21,8 +16,6 @@ func NewResolver(db *gorm.DB, redisClient *redis.Client, tokenService *tokenServ
 }
 
 type Resolver struct {
-	Db           *gorm.DB
-	RedisClient  *redis.Client
 	TokenService *tokenService.TokenManager
 	UserService  *userService.UserService
 	TodoService  *todoservice.TodoService

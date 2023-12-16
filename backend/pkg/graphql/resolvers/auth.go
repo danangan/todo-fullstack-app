@@ -2,31 +2,39 @@ package resolvers
 
 import (
 	"app/graphql/generated"
+	"app/pkg/appError"
 	"app/pkg/db/models"
 	passwordPkg "app/pkg/password"
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
-// Todos
-// * Track the user and the current active token
-// * To revoke the previously granted token by adding it to the blacklist if the user still have an active token
-// * Maybe we don't need to revoke it at all? Maybe we can just return the existing one?
+var ErrUserNotFound = errors.New("server error")
+var ErrUserIsARegistered = errors.New("user is already registered")
+
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*generated.AuthPayload, error) {
-
-	user := &models.User{}
-
-	result := r.Db.Where("email = ?", email).First(&user)
-
-	if result.Error != nil {
-		return nil, result.Error
+	user := &models.User{
+		Email: email,
 	}
 
-	err := passwordPkg.ComparePassword(password, user.Password)
+	user, err := r.UserService.GetUser(user)
 
 	if err != nil {
-		return nil, errors.New("password does not match")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+
+		return nil, appError.ErrServer
+	}
+
+	err = passwordPkg.ComparePassword(password, user.Password)
+
+	if err != nil {
+		return nil, errors.New("invalid passwword")
 	}
 
 	token, err := r.TokenService.GenerateToken(ctx, user.ID.String())
@@ -34,7 +42,7 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	if err != nil {
 		fmt.Printf("failed to generate token, error: %v", err)
 
-		return nil, errors.New("failed to generate token")
+		return nil, appError.ErrServer
 	}
 
 	response := &generated.AuthPayload{
@@ -46,33 +54,18 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 }
 
 func (r *mutationResolver) Register(ctx context.Context, firstName string, lastName string, email string, password string) (*generated.AuthPayload, error) {
-	user := models.NewUser(
-		firstName,
-		lastName,
-		email,
-		password,
-	)
-
-	validationErrors := user.Validate()
-
-	if validationErrors != nil {
-		return nil, validationErrors
-	}
-
-	hashedPassword, err := passwordPkg.HashPassword(user.Password)
+	user, err := r.UserService.CreateUser(firstName, lastName, email, password)
 
 	if err != nil {
-		return nil, err
-	}
+		if validationErr, ok := err.(validator.ValidationErrors); ok {
+			return nil, validationErr
+		}
 
-	user.Password = hashedPassword
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return nil, ErrUserIsARegistered
+		}
 
-	result := r.Db.Create(&user)
-
-	if result.Error != nil {
-		fmt.Println(result.Error)
-
-		return nil, result.Error
+		return nil, appError.ErrServer
 	}
 
 	token, err := r.TokenService.GenerateToken(ctx, user.ID.String())

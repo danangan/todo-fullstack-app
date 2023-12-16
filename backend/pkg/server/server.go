@@ -16,7 +16,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 var defaultPort string = "8080"
@@ -44,7 +43,7 @@ func CreateServer() {
 	userService := _userService.New(db)
 	todoService := _todoService.New(db)
 
-	gqlConfig := createGqlConfig(db, redisClient, tokenService, userService, todoService)
+	gqlConfig := createGqlConfig(tokenService, userService, todoService)
 
 	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient, tokenService)
 
@@ -57,9 +56,9 @@ func CreateServer() {
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
-func createGqlConfig(db *gorm.DB, redisClient *redis.Client, tokenManager *_tokenService.TokenManager, userService *_userService.UserService, todoService *_todoService.TodoService) generated.Config {
+func createGqlConfig(tokenManager *_tokenService.TokenManager, userService *_userService.UserService, todoService *_todoService.TodoService) generated.Config {
 	directives := directives.NewDirectiveRoot()
-	resolvers := resolvers.NewResolver(db, redisClient, tokenManager, userService, todoService)
+	resolvers := resolvers.NewResolver(tokenManager, userService, todoService)
 
 	return generated.Config{Resolvers: resolvers, Directives: *directives}
 }

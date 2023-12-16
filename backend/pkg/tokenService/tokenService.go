@@ -53,6 +53,8 @@ func New(redisClient *redis.Client) *TokenManager {
 		secretKey: getSecretKey(),
 	}
 }
+
+// Generate token automatically revoke previously active token associated with the user
 func (t *TokenManager) GenerateToken(ctx context.Context, userId string) (string, error) {
 	token, err := t.GetActiveToken(ctx, userId)
 

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"app/pkg/db/utils"
+	"app/pkg/utils"
 	"os"
 )
 

@@ -7,16 +7,6 @@ import (
 	"context"
 )
 
-func (r *queryResolver) User(ctx context.Context, id string) (*generated.User, error) {
-	user, err := r.UserService.GetUser(id)
-
-	if err != nil {
-		return nil, appError.ErrServer
-	}
-
-	return user.ToGraphUser(), nil
-}
-
 func (r *queryResolver) CurrentUser(ctx context.Context) (*generated.User, error) {
 	currentUser, err := appContext.GetCurrentUser(ctx)
 
@@ -27,34 +17,16 @@ func (r *queryResolver) CurrentUser(ctx context.Context) (*generated.User, error
 	return currentUser.ToGraphUser(), nil
 }
 
-func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, firstName *string, lastName *string, email *string) (*generated.User, error) {
+func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, firstName *string, lastName *string) (*generated.User, error) {
 	currentUser, err := appContext.GetCurrentUser(ctx)
 
 	if err != nil {
 		return nil, appError.ErrServer
 	}
 
-	if firstName != nil {
-		currentUser.FirstName = *firstName
-	}
+	currentUser, err = r.UserService.UpdateUser(currentUser, firstName, lastName)
 
-	if lastName != nil {
-		currentUser.LastName = *lastName
-	}
-
-	if email != nil {
-		currentUser.Email = *email
-	}
-
-	validationErrors := currentUser.Validate()
-
-	if validationErrors != nil {
-		return nil, validationErrors
-	}
-
-	result := r.Db.Save(currentUser)
-
-	if result.Error != nil {
+	if err != nil {
 		return nil, appError.ErrServer
 	}
 

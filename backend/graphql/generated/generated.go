@@ -58,14 +58,13 @@ type ComplexityRoot struct {
 		DeleteTodo        func(childComplexity int, id string) int
 		Login             func(childComplexity int, email string, password string) int
 		Register          func(childComplexity int, firstName string, lastName string, email string, password string) int
-		UpdateCurrentUser func(childComplexity int, firstName *string, lastName *string, email *string) int
+		UpdateCurrentUser func(childComplexity int, firstName *string, lastName *string) int
 		UpdateTodo        func(childComplexity int, id string, title *string, description *string, dueDate *time.Time) int
 	}
 
 	Query struct {
 		CurrentUser func(childComplexity int) int
 		Todos       func(childComplexity int) int
-		User        func(childComplexity int, email string) int
 	}
 
 	Todo struct {
@@ -87,13 +86,12 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	Register(ctx context.Context, firstName string, lastName string, email string, password string) (*AuthPayload, error)
 	Login(ctx context.Context, email string, password string) (*AuthPayload, error)
-	UpdateCurrentUser(ctx context.Context, firstName *string, lastName *string, email *string) (*User, error)
+	UpdateCurrentUser(ctx context.Context, firstName *string, lastName *string) (*User, error)
 	CreateTodo(ctx context.Context, title string, description string, dueDate time.Time) (*Todo, error)
 	UpdateTodo(ctx context.Context, id string, title *string, description *string, dueDate *time.Time) (*Todo, error)
 	DeleteTodo(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
-	User(ctx context.Context, email string) (*User, error)
 	CurrentUser(ctx context.Context) (*User, error)
 	Todos(ctx context.Context) ([]*Todo, error)
 }
@@ -189,7 +187,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateCurrentUser(childComplexity, args["firstName"].(*string), args["lastName"].(*string), args["email"].(*string)), true
+		return e.complexity.Mutation.UpdateCurrentUser(childComplexity, args["firstName"].(*string), args["lastName"].(*string)), true
 
 	case "Mutation.updateTodo":
 		if e.complexity.Mutation.UpdateTodo == nil {
@@ -216,18 +214,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Todos(childComplexity), true
-
-	case "Query.user":
-		if e.complexity.Query.User == nil {
-			break
-		}
-
-		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.User(childComplexity, args["email"].(string)), true
 
 	case "Todo.description":
 		if e.complexity.Todo.Description == nil {
@@ -398,7 +384,6 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../../../graphql/directives.graphql", Input: `directive @authenticated on FIELD_DEFINITION`, BuiltIn: false},
 	{Name: "../../../graphql/operations.graphql", Input: `type Query {
-  user(email: String!): User @authenticated
   currentUser: User @authenticated
   todos: [Todo!]! @authenticated
 }
@@ -411,7 +396,7 @@ type AuthPayload {
 type Mutation {
   register(firstName: String!, lastName: String!, email: String!, password: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
-  updateCurrentUser(firstName: String, lastName: String, email: String): User @authenticated
+  updateCurrentUser(firstName: String, lastName: String): User @authenticated
   createTodo(title: String!, description: String!, dueDate: Date!): Todo @authenticated
   updateTodo(id: ID!, title: String, description: String, dueDate: Date): Todo @authenticated
   deleteTodo(id: ID!): Boolean! @authenticated
@@ -575,15 +560,6 @@ func (ec *executionContext) field_Mutation_updateCurrentUser_args(ctx context.Co
 		}
 	}
 	args["lastName"] = arg1
-	var arg2 *string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg2
 	return args, nil
 }
 
@@ -641,21 +617,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["email"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["email"] = arg0
 	return args, nil
 }
 
@@ -926,7 +887,7 @@ func (ec *executionContext) _Mutation_updateCurrentUser(ctx context.Context, fie
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().UpdateCurrentUser(rctx, fc.Args["firstName"].(*string), fc.Args["lastName"].(*string), fc.Args["email"].(*string))
+			return ec.resolvers.Mutation().UpdateCurrentUser(rctx, fc.Args["firstName"].(*string), fc.Args["lastName"].(*string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.Authenticated == nil {
@@ -1230,88 +1191,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteTodo(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteTodo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().User(rctx, fc.Args["email"].(string))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.Authenticated == nil {
-				return nil, errors.New("directive authenticated is not implemented")
-			}
-			return ec.directives.Authenticated(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*User); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *app/graphql/generated.User`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖappᚋgraphqlᚋgeneratedᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3903,25 +3782,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_user(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "currentUser":
 			field := field
 

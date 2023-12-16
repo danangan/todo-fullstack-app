@@ -4,7 +4,6 @@ import (
 	graph "app/graphql/generated"
 	"app/pkg/appContext"
 	"app/pkg/appError"
-	"app/pkg/db/models"
 	"context"
 	"time"
 )
@@ -16,11 +15,9 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*graph.Todo, error) {
 		return nil, appError.ErrServer
 	}
 
-	todos := make([]*models.Todo, 0)
+	todos, err := r.TodoService.GetUserTodos(user)
 
-	result := r.Db.Find(&todos, "user_id = ?", user.ID.String())
-
-	if result.Error != nil {
+	if err != nil {
 		return nil, appError.ErrServer
 	}
 
@@ -40,22 +37,9 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, title string, descrip
 		return nil, appError.ErrServer
 	}
 
-	todo := &models.Todo{
-		Title:       title,
-		Description: description,
-		DueDate:     dueDate,
-		User:        *user,
-	}
+	todo, err := r.TodoService.CreateTodo(user, title, description, dueDate)
 
-	validationError := todo.Validate()
-
-	if validationError != nil {
-		return nil, validationError
-	}
-
-	result := r.Db.Create(todo)
-
-	if result.Error != nil {
+	if err != nil {
 		return nil, appError.ErrServer
 	}
 
@@ -69,35 +53,9 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id string, title *str
 		return nil, appError.ErrServer
 	}
 
-	todo := &models.Todo{}
+	todo, err := r.TodoService.UpdateTodo(id, user, title, description, dueDate)
 
-	result := r.Db.Where("id = ? AND user_id = ?", id, user.ID.String()).First(todo)
-
-	if result.Error != nil {
-		return nil, appError.ErrServer
-	}
-
-	if title != nil {
-		todo.Title = *title
-	}
-
-	if description != nil {
-		todo.Description = *description
-	}
-
-	if dueDate != nil {
-		todo.DueDate = *dueDate
-	}
-
-	validationError := todo.Validate()
-
-	if validationError != nil {
-		return nil, validationError
-	}
-
-	result = r.Db.Save(todo)
-
-	if result.Error != nil {
+	if err != nil {
 		return nil, appError.ErrServer
 	}
 
@@ -111,18 +69,11 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (bool, err
 		return false, appError.ErrServer
 	}
 
-	todo := &models.Todo{}
-	result := r.Db.First(todo, "id = ? AND user_id = ?", id, user.ID.String())
+	success, err := r.TodoService.DeleteTodo(id, user)
 
-	if result.Error != nil {
+	if err != nil {
 		return false, appError.ErrServer
 	}
 
-	result = r.Db.Delete(todo)
-
-	if result.Error != nil {
-		return false, appError.ErrServer
-	}
-
-	return true, nil
+	return success, nil
 }

@@ -1,5 +1,4 @@
 type Query {
-  user(email: String!): User @authenticated
   currentUser: User @authenticated
   todos: [Todo!]! @authenticated
 }
@@ -12,7 +11,7 @@ type AuthPayload {
 type Mutation {
   register(firstName: String!, lastName: String!, email: String!, password: String!): AuthPayload
   login(email: String!, password: String!): AuthPayload
-  updateCurrentUser(firstName: String, lastName: String, email: String): User @authenticated
+  updateCurrentUser(firstName: String, lastName: String): User @authenticated
   createTodo(title: String!, description: String!, dueDate: Date!): Todo @authenticated
   updateTodo(id: ID!, title: String, description: String, dueDate: Date): Todo @authenticated
   deleteTodo(id: ID!): Boolean! @authenticated

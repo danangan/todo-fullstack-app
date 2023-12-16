@@ -17,10 +17,20 @@ func New(db *gorm.DB) *UserService {
 	return &UserService{Db: db}
 }
 
-func (u *UserService) GetUser(id string) (*models.User, error) {
+func (u *UserService) GetUser(user *models.User) (*models.User, error) {
+	result := u.Db.Where(user).First(user)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return user, nil
+}
+
+func (u *UserService) GetUserById(id string) (*models.User, error) {
 	user := &models.User{}
 
-	result := u.Db.Where("id = ?", id).First(user)
+	result := u.Db.Where("ID = ?", id).First(user)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -62,23 +72,13 @@ func (u *UserService) CreateUser(firstName string, lastName string, email string
 	return user, nil
 }
 
-func (u *UserService) UpdateUser(id string, firstName string, lastName string, email string) (*models.User, error) {
-	user, err := u.GetUser(id)
-
-	if err != nil {
-		return nil, err
+func (u *UserService) UpdateUser(user *models.User, firstName *string, lastName *string) (*models.User, error) {
+	if firstName != nil {
+		user.FirstName = *firstName
 	}
 
-	if firstName != "" {
-		user.FirstName = firstName
-	}
-
-	if lastName != "" {
-		user.LastName = lastName
-	}
-
-	if email != "" {
-		user.Email = email
+	if lastName != nil {
+		user.LastName = *lastName
 	}
 
 	validationErrors := user.Validate()
