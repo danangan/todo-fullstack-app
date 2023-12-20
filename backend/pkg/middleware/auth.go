@@ -4,14 +4,28 @@ import (
 	"app/pkg/appContext"
 	"app/pkg/db/models"
 	"app/pkg/tokenService"
+	"app/pkg/userService"
 	"context"
+	"encoding/json"
 	"net/http"
-
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
-func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client, tokenManager *tokenService.TokenManager) Middleware {
+func writeError(w http.ResponseWriter, message string, errorCode int) {
+	w.WriteHeader(http.StatusInternalServerError)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"errors": []map[string]interface{}{
+			{
+				"message": message,
+				"code":    errorCode,
+			},
+		},
+	})
+}
+
+func CreateAuthMiddleware(tokenManager *tokenService.TokenManager, userService *userService.UserService) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var currentUser *models.User
@@ -19,34 +33,32 @@ func CreateAuthMiddleware(db *gorm.DB, redisClient *redis.Client, tokenManager *
 			stringToken := r.Header.Get("X-AUTH-TOKEN")
 
 			if stringToken != "" {
-				token, claims, err := tokenManager.ParseToken(stringToken)
-
-				if err != nil || !token.Valid {
-					http.Error(w, "invalid auth token", http.StatusUnauthorized)
-
-					return
-				}
-
 				isTokenRevoked, err := tokenManager.IsTokenRevoked(r.Context(), stringToken)
 
 				if err != nil {
-					http.Error(w, "can't verify token", http.StatusInternalServerError)
+					writeError(w, "internal server error", http.StatusInternalServerError)
 
 					return
 				}
 
 				if isTokenRevoked {
-					http.Error(w, "token is invalid", http.StatusUnauthorized)
+					writeError(w, "invalid token", http.StatusUnauthorized)
 
 					return
 				}
 
-				user := &models.User{}
+				token, claims, err := tokenManager.ParseToken(stringToken)
 
-				result := db.Where("id = ?", claims.UserId).First(user)
+				if err != nil || !token.Valid {
+					writeError(w, "invalid token", http.StatusUnauthorized)
 
-				if result.Error != nil {
-					http.Error(w, "invalid auth token", http.StatusUnauthorized)
+					return
+				}
+
+				user, err := userService.GetUserById(claims.UserId)
+
+				if err != nil || user == nil {
+					writeError(w, "invalid token", http.StatusUnauthorized)
 
 					return
 				}

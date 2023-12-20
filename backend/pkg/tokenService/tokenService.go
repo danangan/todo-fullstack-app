@@ -50,7 +50,8 @@ type TokenManager struct {
 
 func New(redisClient *redis.Client) *TokenManager {
 	return &TokenManager{
-		secretKey: getSecretKey(),
+		secretKey:   getSecretKey(),
+		redisClient: redisClient,
 	}
 }
 
@@ -107,7 +108,7 @@ func (t *TokenManager) createToken(userId string, expiry time.Time) (string, err
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Sign the token with the secret key
-	tokenString, err := token.SignedString(getSecretKey())
+	tokenString, err := token.SignedString(t.secretKey)
 
 	if err != nil {
 		fmt.Println(err)
@@ -126,7 +127,7 @@ func (t *TokenManager) ParseToken(tokenString string) (*jwt.Token, *AppClaims, e
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return getSecretKey(), nil
+		return t.secretKey, nil
 	})
 
 	if err != nil {

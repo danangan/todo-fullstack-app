@@ -38,6 +38,10 @@ func CreateServer() {
 		DB:       0,  // use default DB
 	})
 
+	if redisClient == nil {
+		log.Panicln("failed to start redis client")
+	}
+
 	// Service initialization
 	tokenService := _tokenService.New(redisClient)
 	userService := _userService.New(db)
@@ -45,7 +49,7 @@ func CreateServer() {
 
 	gqlConfig := createGqlConfig(tokenService, userService, todoService)
 
-	authMiddleware := middleware.CreateAuthMiddleware(db, redisClient, tokenService)
+	authMiddleware := middleware.CreateAuthMiddleware(tokenService, userService)
 
 	mux := http.NewServeMux()
 
