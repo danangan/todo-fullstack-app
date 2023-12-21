@@ -10,11 +10,11 @@ import (
 
 type Todo struct {
 	BaseModel
-	UserID      uuid.UUID `gorm:"not null"`
+	UserID      uuid.UUID `gorm:"not null" json:"userId"`
 	User        User      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" validate:"-"`
-	Title       string    `gorm:"notNull" validate:"required,min=3"`
-	Description string    `gorm:"notNull" validate:"required,min=3"`
-	DueDate     time.Time `gorm:"notNull" validate:"required"`
+	Title       string    `gorm:"notNull" validate:"required,min=3" json:"title"`
+	Description string    `gorm:"notNull" validate:"required,min=3" json:"description"`
+	DueDate     time.Time `gorm:"notNull" validate:"required" json:"dueDate"`
 }
 
 func (t *Todo) Validate() *validator.ValidationErrors {

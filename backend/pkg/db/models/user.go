@@ -8,10 +8,10 @@ import (
 
 type User struct {
 	BaseModel
-	FirstName string `gorm:"notNull" validate:"required,alpha,min=3"`
-	LastName  string `gorm:"notNull" validate:"required,alpha,min=3"`
-	Email     string `gorm:"notNull;unique" validate:"required,email"`
-	Password  string `gorm:"notNull" validate:"required,min=6"`
+	FirstName string `gorm:"notNull" validate:"required,alpha,min=3" json:"firstName"`
+	LastName  string `gorm:"notNull" validate:"required,alpha,min=3" json:"lastName"`
+	Email     string `gorm:"notNull;unique" validate:"required,email" json:"email"`
+	Password  string `gorm:"notNull" validate:"required,min=6" json:"password"`
 }
 
 func (u *User) Validate() *validator.ValidationErrors {
